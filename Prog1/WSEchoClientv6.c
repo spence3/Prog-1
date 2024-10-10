@@ -23,34 +23,88 @@
 #include <winsock2.h> // for Winsock2 functions
 #include <ws2tcpip.h> // adds support for getaddrinfo & getnameinfo for v4+6 name resolution
 #include <Ws2ipdef.h> // optional - needed for MS IP Helper
+#include <stdbool.h> //include bool
 
 // #define ALL required constants HERE, not inline
 // #define is a macro, don't terminate with ';' For example...
 #define RCVBUFSIZ 50 // buffer size for received messages
 
 // declare any functions located in other .c files here
-void DisplayFatalErr(char* errMsg); // writes error message before abnormal termination
 
-void main(int argc, char* argv[]) { // argc is # of strings following command, argv[] is array of ptrs to the strings
+void DisplayFatalErr(char* errMsg)
+{
+    // Returns errorcode from current task or thread
+    fprintf(stderr, "%s: %d\n", errMsg, WSAGetLastError()); 
+        WSACleanup();
+    exit(1);
+}
+
+int main(int argc, char* argv[]) { // argc is # of strings following command, argv[] is array of ptrs to the strings
     // Declare ALL variables and structures for main() HERE, NOT INLINE (including the following...)
     WSADATA wsaData; // contains details about WinSock DLL implementation
-    struct sockaddr_in6 serverInfo; // standard IPv6 structure that holds server socket info
+    //initialize data
+    int sock1, sock2;
+    int numArgs;
+    numArgs = argc;
 
-    printf("hello world!");
+    if (numArgs != 4) {
+        printf("Number of arguments are not corret... Must have 4.");
+        exit(1);
+    }
 
-    // Verify correct number of command line arguments, else do the following:
-    // fprintf(stderr, "Helpful error message goes here\n");
-    // exit(1); // ...and terminate with abnormal termination code (1)
+    //Declare structure and variables
+    struct sockaddr_in6 serverInfo;
 
-    // Retrieve the command line arguments. (Sanity checks not required, but port and IP addr will need to be converted from char to network standard. See slides 11-15 & 12-3 for details.)
+    //Server IP address and port number come from the client command line
+    char* ip;
+    unsigned short port;
 
-    // Initialize Winsock 2.0 DLL. Returns 0 if ok. If this fails, fprintf error message to stderr as above & exit(1).
-    // Create an IPv6 TCP stream socket. Now that Winsock DLL is loaded, we can signal any errors as shown on next line:
-    // DisplayFatalErr("socket() function failed.");
+    //get ip and port from command line
+    ip = argv[1];
+    port = (unsigned short)atoi(argv[2]);
 
-    // Display helpful confirmation messages after key socket calls like this:
-    // printf("Socket created successfully. Press any key to continue...");
-    // getchar(); // needed to hold console screen open
+    //procedural code
+    memset(&serverInfo, 0, sizeof(serverInfo));//zero out the structure
+
+    //load server info into sockadd_in6
+    serverInfo.sin6_family = AF_INET6;
+    serverInfo.sin6_port = htons(port); //convert int port into network order*
+
+    //convert server addr from char to ntwrk form, load into socketaddr_in6
+    if (inet_pton(AF_INET6, ip, &serverInfo.sin6_addr) <= 0) {
+        int err = WSAGetLastError(); // Get the error code
+        fprintf(stderr, "inet_pton() failed to convert IP address: %s. Error: %d\n", ip, err);
+        exit(1); // Exit with error code
+    }
+
+    //Initialize Winsock 2.0 DLL
+    int result = WSAStartup(MAKEWORD(2, 0), &wsaData);
+    if (result != 0) {
+        fprintf(stderr, "Failed to initialize Winsock");
+        exit(1);
+    }
+    //set up socks
+    sock1 = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+    sock2 = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+    
+    
+    //check for success of socks
+    if (sock1 == INVALID_SOCKET) {
+        DisplayFatalErr("socket() function failed for sock1.");
+    }
+    else {
+        printf("Socket1 created successfully. Press ENTER key to continue...");
+        getchar();
+    }
+    if (sock2 == INVALID_SOCKET) {
+        DisplayFatalErr("socket() function failed for sock2.");
+    }
+    else {
+        printf("Socket2 created successfully. Press ENTER key to continue...");
+        getchar();
+    }
+    
+
 
     // If doing extra credit IPv4 address handling option, add the setsockopt() call as follows...
     // if (perrno = setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&v6Only, sizeof(v6Only)) != 0)
@@ -76,3 +130,27 @@ void main(int argc, char* argv[]) { // argc is # of strings following command, a
     // Release the Winsock DLL
     exit(0);
 }
+
+
+//DONE:
+   // Verify correct number of command line arguments, else do the following:
+    // fprintf(stderr, "Helpful error message goes here\n");
+    // exit(1); // ...and terminate with abnormal termination code (1)]
+
+
+    //----------------PRETTY SURE IM GOOD ON THIS------------------
+    // Retrieve the command line arguments.
+    // (Sanity checks not required, but port and
+    // IP addr will need to be converted from char to network standard.
+    // See slides 11-15 & 12-3 for details.)
+
+
+   // Initialize Winsock 2.0 DLL. Returns 0 if ok. If this fails, fprintf error message to stderr as above & exit(1).
+    // Create an IPv6 TCP stream socket. Now that Winsock DLL is loaded, we can signal any errors as shown on next line:
+    // DisplayFatalErr("socket() function failed.");
+
+
+
+    // Display helpful confirmation messages after key socket calls like this:
+    // printf("Socket created successfully. Press any key to continue...");
+    // getchar(); // needed to hold console screen open

@@ -1,4 +1,4 @@
 ﻿  WSEchoClientv6.c
-C:\Users\10776629\Desktop\Prog 1\Prog1\Prog1\WSEchoClientv6.c(36,13): warning C4101: 'wsaData': unreferenced local variable
-C:\Users\10776629\Desktop\Prog 1\Prog1\Prog1\WSEchoClientv6.c(37,25): warning C4101: 'serverInfo': unreferenced local variable
+C:\Users\10776629\Desktop\Prog 1\Prog1\Prog1\WSEchoClientv6.c(87,13): warning C4244: '=': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\10776629\Desktop\Prog 1\Prog1\Prog1\WSEchoClientv6.c(88,13): warning C4244: '=': conversion from 'SOCKET' to 'int', possible loss of data
   Prog1.vcxproj -> C:\Users\10776629\Desktop\Prog 1\Prog1\x64\Debug\Prog1.exe
