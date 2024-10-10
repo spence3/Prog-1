@@ -104,14 +104,13 @@ int main(int argc, char* argv[]) { // argc is # of strings following command, ar
         getchar();
     }
     
+    if (connect(sock1, (struct sockaddr*)&serverInfo, sizeof(serverInfo)) < 0) {
+        DisplayFatalErr("connect() function failed.");
+    }
+    else {
+        printf("good!");
+    }
 
-
-    // If doing extra credit IPv4 address handling option, add the setsockopt() call as follows...
-    // if (perrno = setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&v6Only, sizeof(v6Only)) != 0)
-    // DisplayFatalErr("setsockopt() function failed.");
-
-    // Zero out the sockaddr_in6 structure and load server info into it. See slide 11-15.
-    // Don't forget any necessary format conversions.
 
     // Attempt connection to the server. If it fails, call DisplayFatalErr() with appropriate message,
     // otherwise printf() confirmation message.
@@ -154,3 +153,13 @@ int main(int argc, char* argv[]) { // argc is # of strings following command, ar
     // Display helpful confirmation messages after key socket calls like this:
     // printf("Socket created successfully. Press any key to continue...");
     // getchar(); // needed to hold console screen open
+
+
+    //-----------------------DO LATER IF FEEL LIKE IT---------------------
+    // If doing extra credit IPv4 address handling option, add the setsockopt() call as follows...
+    // if (perrno = setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&v6Only, sizeof(v6Only)) != 0)
+    // DisplayFatalErr("setsockopt() function failed.");
+
+    //-----------------------FEEL PRETTY GOOD ON THIS---------------------
+    // Zero out the sockaddr_in6 structure and load server info into it. See slide 11-15.
+    // Don't forget any necessary format conversions.
