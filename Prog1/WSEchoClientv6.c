@@ -28,6 +28,7 @@
 // #define ALL required constants HERE, not inline
 // #define is a macro, don't terminate with ';' For example...
 #define RCVBUFSIZ 50 // buffer size for received messages
+char rcvBuffer[RCVBUFSIZ]; // Buffer to store received data
 
 // declare any functions located in other .c files here
 
@@ -56,12 +57,17 @@ int main(int argc, char* argv[]) { // argc is # of strings following command, ar
     struct sockaddr_in6 serverInfo;
 
     //Server IP address and port number come from the client command line
+    //initialize message ("This is a test")
     char* ip;
-    unsigned short port;
+    int port;
+    const char* message;
+    int msgLen;
 
     //get ip and port from command line
     ip = argv[1];
     port = (unsigned short)atoi(argv[2]);
+    message = argv[3];
+    msgLen = strlen(message);
 
     //procedural code
     memset(&serverInfo, 0, sizeof(serverInfo));//zero out the structure
@@ -86,8 +92,8 @@ int main(int argc, char* argv[]) { // argc is # of strings following command, ar
     //set up socks
     sock1 = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
     sock2 = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-    
-    
+
+
     //check for success of socks
     if (sock1 == INVALID_SOCKET) {
         DisplayFatalErr("socket() function failed for sock1.");
@@ -103,20 +109,76 @@ int main(int argc, char* argv[]) { // argc is # of strings following command, ar
         printf("Socket2 created successfully. Press ENTER key to continue...");
         getchar();
     }
-    
+
+    //connect to server
     if (connect(sock1, (struct sockaddr*)&serverInfo, sizeof(serverInfo)) < 0) {
-        DisplayFatalErr("connect() function failed.");
+        DisplayFatalErr("connect() function failed.\n");
     }
     else {
-        printf("good!");
+        printf("Connected to server!\n");
+    }
+
+    //Check for null msg(length = 0)
+    if (msgLen == 0) {
+        DisplayFatalErr("We not good with message length\n");
+    }
+    //send function
+    int PASCAL FAR send(SOCKET s, const char FAR * buf, int len, int flags);
+    //send message
+    if (send(sock1, message, msgLen, 0) != msgLen) {
+        DisplayFatalErr("Failed to Send Message\n");
+    }
+    else {
+        printf("Send Successfull!\n");
+    }
+
+    //receive function
+    int PASCAL FAR recv(SOCKET s, char FAR * buf, int len, int flags);
+    int bytesRead;
+    int totalBytesReceived = 0;
+    while ((bytesRead = recv(sock1, rcvBuffer, RCVBUFSIZ - 1, 0)) > 0) {
+   
+        //errors
+        if (bytesRead < 0) {
+            DisplayFatalErr("Message not received");
+        }
+
+        msgLen += bytesRead;
+        rcvBuffer[bytesRead] = '\0';
+        
+        printf("Received chunk: %s\n", rcvBuffer); // Print received chunk
+        printf("%d\n", bytesRead);
+    }
+    printf("Made it out!");
+   
+
+    //do {
+    //    bytesRead = recv(sock1, rcvBuffer, RCVBUFSIZ - 1, 0);
+    //    if (bytesRead < 0) {
+    //        DisplayFatalErr("Message not received");
+    //    }
+    //    else if (bytesRead == 0) {
+    //       //connection closed
+    //        break;
+    //    }
+
+    //    msgLen += bytesRead;
+    //    rcvBuffer[bytesRead] = '\0';
+
+    //    printf("Received chunk: %s\n", rcvBuffer); // Print received chunk
+    //    printf("%d\n", bytesRead);
+    //} while (bytesRead > 0);
+
+
+    if (totalBytesReceived == msgLen) {
+        printf("Received all data successfully! Total bytes received: %d\n", totalBytesReceived);
+    }
+    else {
+        printf("Received %d bytes, but expected %d bytes.\n", totalBytesReceived, msgLen);
     }
 
 
-    // Attempt connection to the server. If it fails, call DisplayFatalErr() with appropriate message,
-    // otherwise printf() confirmation message.
 
-    // Send message to server (without '\0' null terminator). Check for null msg (length=0) & verify all bytes were sent...
-    // ...else call DisplayFatalErr() with appropriate message as before.
 
     // Retrieve the message returned by server. Be sure you've read the whole thing (could be multiple segments).
     // Manage receive buffer to prevent overflow with a big message.
@@ -163,3 +225,13 @@ int main(int argc, char* argv[]) { // argc is # of strings following command, ar
     //-----------------------FEEL PRETTY GOOD ON THIS---------------------
     // Zero out the sockaddr_in6 structure and load server info into it. See slide 11-15.
     // Don't forget any necessary format conversions.
+
+
+    // Attempt connection to the server. If it fails, call DisplayFatalErr() with appropriate message,
+    // otherwise printf() confirmation message.
+
+
+
+    //------------------------PRETTY SURE WE GOOD HERE---------------------
+    // Send message to server (without '\0' null terminator). Check for null msg (length=0) & verify all bytes were sent...
+    // ...else call DisplayFatalErr() with appropriate message as before.
