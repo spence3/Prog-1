@@ -158,8 +158,11 @@ int main(int argc, char* argv[]) { // argc is # of strings following command, ar
         }
     }
 
-    printf("Made it out!\n");
-    closesocket(sock1);//release
+    closesocket(sock1);//close socket and send FIN
+    printf("Socket Closed Successfully...\n");
+    WSACleanup();//cleanup
+    printf("Winsock resources cleaned up successfully...\n");
+
 
     exit(0);
 }
