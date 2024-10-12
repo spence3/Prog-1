@@ -1,8 +1,8 @@
 // CS 2690 Program 1
 // Simple Windows Sockets Echo Client (IPv6)
 // Last update: 2/12/19
-// <Your name here> <Your section here> <Date>
-// <Your Windows version and Visual Studio version>
+// Spencer Miller 601 10/11/24
+// Windows 11 VS 2019
 //
 // Usage: WSEchoClientv6 <server IPv6 address> <server port> <"message to echo">
 // Companion server is WSEchoServerv6
@@ -135,60 +135,32 @@ int main(int argc, char* argv[]) { // argc is # of strings following command, ar
     //receive function
     int PASCAL FAR recv(SOCKET s, char FAR * buf, int len, int flags);
     int bytesRead;
-    int totalBytesReceived = 0;
+    int totalBytesReceived = 0;//should equal message len
+    int PASCAL FAR closesocket(SOCKET s);// closing socket when finished
+
+    printf("msg len(expected bytes to receive): %d\n", msgLen);//expected bytes to receive
     while ((bytesRead = recv(sock1, rcvBuffer, RCVBUFSIZ - 1, 0)) > 0) {
-   
         //errors
-        if (bytesRead < 0) {
+        if (bytesRead <= 0) {
             DisplayFatalErr("Message not received");
         }
 
-        msgLen += bytesRead;
-        rcvBuffer[bytesRead] = '\0';
-        
+
+        totalBytesReceived += bytesRead;//updating total bytes
+        rcvBuffer[bytesRead] = '\0';//C string for printing
+
         printf("Received chunk: %s\n", rcvBuffer); // Print received chunk
         printf("%d\n", bytesRead);
-    }
-    printf("Made it out!");
-   
 
-    //do {
-    //    bytesRead = recv(sock1, rcvBuffer, RCVBUFSIZ - 1, 0);
-    //    if (bytesRead < 0) {
-    //        DisplayFatalErr("Message not received");
-    //    }
-    //    else if (bytesRead == 0) {
-    //       //connection closed
-    //        break;
-    //    }
-
-    //    msgLen += bytesRead;
-    //    rcvBuffer[bytesRead] = '\0';
-
-    //    printf("Received chunk: %s\n", rcvBuffer); // Print received chunk
-    //    printf("%d\n", bytesRead);
-    //} while (bytesRead > 0);
-
-
-    if (totalBytesReceived == msgLen) {
-        printf("Received all data successfully! Total bytes received: %d\n", totalBytesReceived);
-    }
-    else {
-        printf("Received %d bytes, but expected %d bytes.\n", totalBytesReceived, msgLen);
+        //all the message has been received --> exit
+        if (totalBytesReceived == msgLen) {
+            closesocket(sock1);
+        }
     }
 
+    printf("Made it out!\n");
+    closesocket(sock1);//release
 
-
-
-    // Retrieve the message returned by server. Be sure you've read the whole thing (could be multiple segments).
-    // Manage receive buffer to prevent overflow with a big message.
-    // Call DisplayFatalErr() if this fails. (Lots can go wrong here, see slides.)
-
-    // Display ALL of the received message, in printable C string format.
-
-    // Close the TCP connection (send a FIN) & print appropriate message.
-
-    // Release the Winsock DLL
     exit(0);
 }
 
@@ -235,3 +207,14 @@ int main(int argc, char* argv[]) { // argc is # of strings following command, ar
     //------------------------PRETTY SURE WE GOOD HERE---------------------
     // Send message to server (without '\0' null terminator). Check for null msg (length=0) & verify all bytes were sent...
     // ...else call DisplayFatalErr() with appropriate message as before.
+
+
+    // Retrieve the message returned by server. Be sure you've read the whole thing (could be multiple segments).
+    // Manage receive buffer to prevent overflow with a big message.
+    // Call DisplayFatalErr() if this fails. (Lots can go wrong here, see slides.)
+
+    // Display ALL of the received message, in printable C string format.
+
+    // Close the TCP connection (send a FIN) & print appropriate message.
+
+    // Release the Winsock DLL
